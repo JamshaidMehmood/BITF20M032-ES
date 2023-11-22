@@ -391,7 +391,7 @@ namespace Assignment_7
             return shapes[color];
         }
     }
-    /*
+    /* Facade pattern
      * 
      * 
      */

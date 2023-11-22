@@ -521,287 +521,101 @@ namespace Assignment_7
         }
     }
 
-    /* Bridge Pattern
-    *
-    *
-    */
-    // Implementor interface
-public interface IDrawingAPI
-{
-    void DrawCircle(int x, int y, int radius);
-}
+    //------------------
+     /*
+  
+  Decrorator pattern:
+  */
+ public abstract class Component
+ {
+     public abstract string Operation();
+ }
 
-// Concrete Implementor A
-public class DrawingAPI1 : IDrawingAPI
-{
-    public void DrawCircle(int x, int y, int radius)
-    {
-        Console.WriteLine($"API1.circle at {x}:{y} radius {radius}");
-    }
-}
+ // Concrete Components provide default implementations of the operations.
+ // There might be several variations of these classes.
+ class ConcreteComponent : Component
+ {
+     public override string Operation()
+     {
+         return "ConcreteComponent";
+     }
+ }
 
-// Concrete Implementor B
-public class DrawingAPI2 : IDrawingAPI
-{
-    public void DrawCircle(int x, int y, int radius)
-    {
-        Console.WriteLine($"API2.circle at {x}:{y} radius {radius}");
-    }
-}
+ // The base Decorator class follows the same interface as the other
+ // components. The primary purpose of this class is to define the wrapping
+ // interface for all concrete decorators. The default implementation of the
+ // wrapping code might include a field for storing a wrapped component and
+ // the means to initialize it.
+ abstract class Decorator : Component
+ {
+     protected Component _component;
 
-// Abstraction
-public abstract class Shape
-{
-    protected IDrawingAPI drawingAPI;
+     public Decorator(Component component)
+     {
+         this._component = component;
+     }
 
-    protected Shape(IDrawingAPI drawingAPI)
-    {
-        this.drawingAPI = drawingAPI;
-    }
+     public void SetComponent(Component component)
+     {
+         this._component = component;
+     }
 
-    public abstract void Draw();
-}
+     // The Decorator delegates all work to the wrapped component.
+     public override string Operation()
+     {
+         if (this._component != null)
+         {
+             return this._component.Operation();
+         }
+         else
+         {
+             return string.Empty;
+         }
+     }
+ }
 
-// Refined Abstraction
-public class CircleShape : Shape
-{
-    private int x, y, radius;
+ // Concrete Decorators call the wrapped object and alter its result in some
+ // way.
+ class ConcreteDecoratorA : Decorator
+ {
+     public ConcreteDecoratorA(Component comp) : base(comp)
+     {
+     }
 
-    public CircleShape(int x, int y, int radius, IDrawingAPI drawingAPI) : base(drawingAPI)
-    {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-    }
+     // Decorators may call parent implementation of the operation, instead
+     // of calling the wrapped object directly. This approach simplifies
+     // extension of decorator classes.
+     public override string Operation()
+     {
+         return $"ConcreteDecoratorA({base.Operation()})";
+     }
+ }
 
-    public override void Draw()
-    {
-        drawingAPI.DrawCircle(x, y, radius);
-    }
-}
-// 2nd example
-// Implementor interface
-public interface IDevice
-{
-    bool IsEnabled { get; }
-    void Enable();
-    void Disable();
-}
+ // Decorators can execute their behavior either before or after the call to
+ // a wrapped object.
+ class ConcreteDecoratorB : Decorator
+ {
+     public ConcreteDecoratorB(Component comp) : base(comp)
+     {
+     }
 
-// Concrete Implementor A
-public class TV : IDevice
-{
-    private bool isEnabled = false;
+     public override string Operation()
+     {
+         return $"ConcreteDecoratorB({base.Operation()})";
+     }
+ }
 
-    public bool IsEnabled { get { return isEnabled; } }
+ public class Client2
+ {
+     // The client code works with all objects using the Component interface.
+     // This way it can stay independent of the concrete classes of
+     // components it works with.
+     public void ClientCode(Component component)
+     {
+         Console.WriteLine("RESULT: " + component.Operation());
+     }
+ }
 
-    public void Enable()
-    {
-        isEnabled = true;
-    }
-
-    public void Disable()
-    {
-        isEnabled = false;
-    }
-}
-
-// Concrete Implementor B
-public class Radio : IDevice
-{
-    private bool isEnabled = false;
-
-    public bool IsEnabled { get { return isEnabled; } }
-
-    public void Enable()
-    {
-        isEnabled = true;
-    }
-
-    public void Disable()
-    {
-        isEnabled = false;
-    }
-}
-
-// Abstraction
-public abstract class Remote
-{
-    protected IDevice device;
-
-    protected Remote(IDevice device)
-    {
-        this.device = device;
-    }
-
-    public abstract void TogglePower();
-}
-
-// Refined Abstraction
-public class RemoteControl : Remote
-{
-    public RemoteControl(IDevice device) : base(device)
-    {
-    }
-
-    public override void TogglePower()
-    {
-        if (device.IsEnabled)
-        {
-            device.Disable();
-            Console.WriteLine("Turned off");
-        }
-        else
-        {
-            device.Enable();
-            Console.WriteLine("Turned on");
-        }
-    }
-}
-
-/*
-*
-*
-*/
-// Component interface
-public interface ICoffee
-{
-    string GetDescription();
-    double GetCost();
-}
-
-// Concrete component
-public class SimpleCoffee : ICoffee
-{
-    public string GetDescription()
-    {
-        return "Simple Coffee";
-    }
-
-    public double GetCost()
-    {
-        return 1.0;
-    }
-}
-
-// Decorator
-public abstract class CoffeeDecorator : ICoffee
-{
-    protected ICoffee decoratedCoffee;
-
-    public CoffeeDecorator(ICoffee decoratedCoffee)
-    {
-        this.decoratedCoffee = decoratedCoffee;
-    }
-
-    public virtual string GetDescription()
-    {
-        return decoratedCoffee.GetDescription();
-    }
-
-    public virtual double GetCost()
-    {
-        return decoratedCoffee.GetCost();
-    }
-}
-
-// Concrete Decorator A
-public class MilkDecorator : CoffeeDecorator
-{
-    public MilkDecorator(ICoffee decoratedCoffee) : base(decoratedCoffee)
-    {
-    }
-
-    public override string GetDescription()
-    {
-        return $"{base.GetDescription()}, with Milk";
-    }
-
-    public override double GetCost()
-    {
-        return base.GetCost() + 0.5;
-    }
-}
-
-// Concrete Decorator B
-public class WhipDecorator : CoffeeDecorator
-{
-    public WhipDecorator(ICoffee decoratedCoffee) : base(decoratedCoffee)
-    {
-    }
-
-    public override string GetDescription()
-    {
-        return $"{base.GetDescription()}, with Whip";
-    }
-
-    public override double GetCost()
-    {
-        return base.GetCost() + 0.7;
-    }
-}
-// 2nd example
-// Component interface
-public interface INotifier
-{
-    void SendNotification(string message);
-}
-
-// Concrete component
-public class EmailNotifier : INotifier
-{
-    public void SendNotification(string message)
-    {
-        Console.WriteLine($"Email notification: {message}");
-    }
-}
-
-// Decorator
-public abstract class NotifierDecorator : INotifier
-{
-    protected INotifier notifier;
-
-    public NotifierDecorator(INotifier notifier)
-    {
-        this.notifier = notifier;
-    }
-
-    public virtual void SendNotification(string message)
-    {
-        notifier.SendNotification(message);
-    }
-}
-
-// Concrete Decorator A
-public class SMSDecorator : NotifierDecorator
-{
-    public SMSDecorator(INotifier notifier) : base(notifier)
-    {
-    }
-
-    public override void SendNotification(string message)
-    {
-        base.SendNotification(message);
-        Console.WriteLine($"SMS notification: {message}");
-    }
-}
-
-// Concrete Decorator B
-public class LoggingDecorator : NotifierDecorator
-{
-    public LoggingDecorator(INotifier notifier) : base(notifier)
-    {
-    }
-
-    public override void SendNotification(string message)
-    {
-        Console.WriteLine($"Logging notification: {message}");
-        base.SendNotification(message);
-    }
-}
-
-
-    
     internal class Program
     {
         static void Main(string[] args)
@@ -895,46 +709,41 @@ public class LoggingDecorator : NotifierDecorator
 
             // Buying a product using the facade
             onlineShopping.BuyProduct("Smartphone", 599.99m);
-            Console.WriteLine("-----------------------------------------------------");
-            CircleShape circle1 = new CircleShape(1, 2, 3, new DrawingAPI1());
-            circle1.Draw();
-
-            CircleShape circle2 = new CircleShape(5, 7, 11, new DrawingAPI2());
-            circle2.Draw();
 
             Console.WriteLine("-----------------------------------------------------");
-            RemoteControl tvRemote = new RemoteControl(new TV());
-            RemoteControl radioRemote = new RemoteControl(new Radio());
-
-            tvRemote.TogglePower(); // Turned on
-            Console.WriteLine(tvRemote.device.IsEnabled); // True
-
-            radioRemote.TogglePower(); // Turned on
-            Console.WriteLine(radioRemote.device.IsEnabled); // True
-
-            tvRemote.TogglePower(); // Turned off
-            Console.WriteLine(tvRemote.device.IsEnabled); // False
+            Console.WriteLine("");
+            Console.WriteLine("Bridge Pattern");
             Console.WriteLine("-----------------------------------------------------");
-
-            ICoffee coffee = new SimpleCoffee();
-            Console.WriteLine(coffee.GetDescription() + " $" + coffee.GetCost());
-
-            coffee = new MilkDecorator(coffee);
-            Console.WriteLine(coffee.GetDescription() + " $" + coffee.GetCost());
-
-            coffee = new WhipDecorator(coffee);
-            Console.WriteLine(coffee.GetDescription() + " $" + coffee.GetCost());
+            Client client = new Client();
+            
+            Abstraction abstraction;
+            // The client code should be able to work with any pre-configured
+            // abstraction-implementation combination.
+            abstraction = new Abstraction(new ConcreteImplementationA());
+            client.ClientCode(abstraction);
+            
+            Console.WriteLine();
+            
+            abstraction = new ExtendedAbstraction(new ConcreteImplementationB());
+            client.ClientCode(abstraction);
+            
             Console.WriteLine("-----------------------------------------------------");
-
-            INotifier notifier = new EmailNotifier();
-            notifier.SendNotification("Sample notification");
-
-            notifier = new SMSDecorator(notifier);
-            notifier.SendNotification("Another notification");
-
-            notifier = new LoggingDecorator(notifier);
-            notifier.SendNotification("Final notification");
+            Console.WriteLine("");
+            Console.WriteLine("Decorator Pattern");
             Console.WriteLine("-----------------------------------------------------");
+            
+            Client2 client2 = new Client2();
+            
+            var simple = new ConcreteComponent();
+            Console.WriteLine("Client: I get a simple component:");
+            client2.ClientCode(simple);
+            Console.WriteLine();
+
+            ConcreteDecoratorA decorator1 = new ConcreteDecoratorA(simple);
+            ConcreteDecoratorB decorator2 = new ConcreteDecoratorB(decorator1);
+            Console.WriteLine("Client: Now I've got a decorated component:");
+            client2.ClientCode(decorator2);
+
 
 
 
